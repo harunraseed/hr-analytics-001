@@ -1,0 +1,69 @@
+name: CD
+
+# Runs on every push to main (i.e. right after a PR merges).
+# One trigger, three stages: dev (auto) -> uat (approval) -> prod (approval).
+on:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+jobs:
+
+  run-dev:
+    name: Run against DEV (hrb_dev)
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      APP_ENV: dev                                   # <-- picks the hrb_dev catalog
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e .
+      - name: Read data from hrb_dev
+        run: hr-analytics
+
+  run-uat:
+    name: Run against UAT (hrb_uat)
+    needs: run-dev
+    runs-on: ubuntu-latest
+    environment: uat                                 # <-- Required reviewers = approval gate
+    env:
+      APP_ENV: uat                                   # <-- picks the hrb_uat catalog
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e .
+      - name: Read data from hrb_uat
+        run: hr-analytics
+
+  run-prod:
+    name: Run against PROD (hrb_prod)
+    needs: run-uat
+    runs-on: ubuntu-latest
+    environment: prod                                # <-- Required reviewers = approval gate
+    env:
+      APP_ENV: prod                                  # <-- picks the hrb_prod catalog
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e .
+      - name: Read data from hrb_prod
+        run: hr-analytics

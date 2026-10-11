@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hr-analytics"
+version = "0.1.0"
+description = "Simple HR analytics package that reads a Delta table from Databricks — a CI/CD teaching project."
+requires-python = ">=3.10"
+dependencies = [
+    "databricks-sql-connector>=3.0.0",
+    "pandas>=2.0.0",
+    "pyarrow>=14.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.5.0",
+]
+
+# Lets us run the package as a single command: `hr-analytics`
+[project.scripts]
+hr-analytics = "hr_analytics.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
