@@ -30,5 +30,5 @@ def average_salary_by_department(df: pd.DataFrame) -> pd.DataFrame:
         .mean()
         .rename(columns={"salary": "avg_salary"})
     )
-    result["avg_salary"] = result["avg_salary"].round(2)
+    result["avg_salary"] = result["avg_salary"].round(3)
     return result
