@@ -10,7 +10,7 @@ import pandas as pd
 
 def total_headcount(df: pd.DataFrame) -> int:
     """Total number of employees."""
-    return int(len(df))
+    return len(df)
 
 
 def headcount_by_department(df: pd.DataFrame) -> pd.DataFrame:
